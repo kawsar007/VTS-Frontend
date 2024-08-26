@@ -56,7 +56,7 @@ const Reports = () => {
   useEffect(() => {
     const calculateAllDistances = () => {
       const distancesArray = [];
-      for (let i = 1; i < reports.length; i++) {
+      for (let i = 1; i < reports?.length; i++) {
         const distance = calculateDistance(reports[i - 1], reports[i]);
         distancesArray.push(distance);
       }
@@ -133,7 +133,7 @@ const Reports = () => {
                     className="mt-1.5 w-full rounded-lg border p-2 border-gray-300 text-gray-700 sm:text-sm"
                   >
                     <option value="">Please select</option>
-                    {userVehicle.length > 0 &&
+                    {userVehicle?.length > 0 &&
                       userVehicle.map((item, i) => (
                         <option key={i} value={item?.number_plate}>
                           {item?.number_plate}
@@ -157,7 +157,7 @@ const Reports = () => {
                     className="mt-1.5 w-full rounded-lg border p-2 border-gray-300 text-gray-700 sm:text-sm"
                   >
                     <option value="">--Select--</option>
-                    {report_types.length > 0 &&
+                    {report_types?.length > 0 &&
                       report_types.map((item, i) => (
                         <option key={i} value={item?.value}>
                           {item?.label}
