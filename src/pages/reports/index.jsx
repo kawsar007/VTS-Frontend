@@ -1,13 +1,35 @@
 import axios from "axios";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import ReportHeader from "../../components/ReportHeader";
 import { SelectTime } from "../../constants/InfoData";
-import { calculateDistance } from "../../utils/calculate-distance";
 import { convertNormalTimeToUnixTime } from "../../utils/date-convertar";
 import { formatDateTime, getTimeRange } from "../../utils/select-time-utility";
 import { report_types } from "../../utils/static-data";
 import DistanceReport from "./distance-report";
+
+// Helper function to convert epoch to readable date
+const convertEpochToDate = epochTime => {
+  const date = new Date(epochTime * 1000); // Convert to milliseconds
+  return date.toLocaleDateString(); // Adjust format as needed
+};
+
+// Helper function to calculate distance between two points using the Haversine formula
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+  const toRadians = degree => degree * (Math.PI / 180);
+
+  const R = 6371; // Radius of the Earth in km
+  const dLat = toRadians(lat2 - lat1);
+  const dLon = toRadians(lon1 - lon2);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRadians(lat1)) *
+      Math.cos(toRadians(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c; // Distance in km
+};
 
 const Reports = () => {
   const [userVehicle, setUserVehicle] = useState([]);
@@ -16,9 +38,14 @@ const Reports = () => {
   const [endTime, setEndTime] = useState("");
   const [currentTime, setCurrentTime] = useState("");
   const [reports, setReports] = useState([]);
-  const [distances, setDistances] = useState([]);
+  // const [distances, setDistances] = useState([]);
   const [selectedVehicle, setSelectedVehicle] = useState("");
   const [selectReport, setSelectReport] = useState("");
+
+  console.log(reports);
+  // console.log(distances);
+  
+  
 
   // Get today's date
   const today = new Date();
@@ -26,10 +53,10 @@ const Reports = () => {
   const options = { year: "numeric", month: "short", day: "2-digit" };
   const todayFormattedDate = today.toLocaleDateString("en-US", options);
 
-  const total = distances.reduce(
-    (accumulator, currentValue) => accumulator + Number(currentValue),
-    0
-  );
+  // const total = distances.reduce(
+  //   (accumulator, currentValue) => accumulator + Number(currentValue),
+  //   0
+  // );
 
   const isFormValid = selectedVehicle && userVehicle && selectedTime;
 
@@ -53,18 +80,18 @@ const Reports = () => {
     fetchUserVehicles();
   }, [fetchUserVehicles]);
 
-  useEffect(() => {
-    const calculateAllDistances = () => {
-      const distancesArray = [];
-      for (let i = 1; i < reports?.length; i++) {
-        const distance = calculateDistance(reports[i - 1], reports[i]);
-        distancesArray.push(distance);
-      }
+  // useEffect(() => {
+  //   const calculateAllDistances = () => {
+  //     const distancesArray = [];
+  //     for (let i = 1; i < reports?.length; i++) {
+  //       const distance = calculateDistance(reports[i - 1], reports[i]);
+  //       distancesArray.push(distance);
+  //     }
 
-      setDistances(distancesArray);
-    };
-    calculateAllDistances();
-  }, [reports]);
+  //     setDistances(distancesArray);
+  //   };
+  //   calculateAllDistances();
+  // }, [reports]);
 
   useEffect(() => {
     const now = new Date();
@@ -109,6 +136,40 @@ const Reports = () => {
       console.log("Error:- ", error);
     }
   };
+
+
+  const groupedData = useMemo(() => {
+      const grouped = {};
+
+      reports?.forEach((item, index) => {
+        const date = convertEpochToDate(item.time);
+        if(!grouped[date]) {
+          grouped[date] = 0;  // Initialize total distance for the date
+        }
+
+        if(index > 0) {
+          const prevItem = reports[index - 1];
+          if(convertEpochToDate(prevItem.time) === date) {
+            const distance = calculateDistance(
+              parseFloat(prevItem.latitude),
+              parseFloat(prevItem.longitude),
+              parseFloat(item.latitude),
+              parseFloat(item.longitude)
+            );
+            grouped[date] += distance;
+          }
+        }
+      });
+
+       // Convert the grouped object to an array of { date, totalDistance } objects
+      return Object.keys(grouped).map(date => ({
+        date,
+        totalDistance: grouped[date].toFixed(2),
+      }))
+  }, [reports]);
+
+  console.log("Grouped Data ---> ", groupedData);
+  
 
   return (
     <div className="bg-[#E9F8F3B2]">
@@ -233,6 +294,8 @@ const Reports = () => {
               </div>
               <div className="flex justify-end items-end">
                 <button
+
+
                   type="submit"
                   // onClick={fetchVehicleReports}
                   disabled={!isFormValid}
@@ -253,7 +316,7 @@ const Reports = () => {
                 todayFormattedDate={todayFormattedDate}
               />
               {/* {total > 0 && <DistanceReport total={total} />} */}
-              <DistanceReport total={total} />
+              <DistanceReport groupedData={groupedData} />
             </div>
           )}
         </div>
