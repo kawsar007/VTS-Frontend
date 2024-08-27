@@ -93,7 +93,7 @@ const Reports = () => {
     e.preventDefault();
 
     const requestBody = {
-      vehicle: selectedVehicle,
+      vehicle: "_353701091544367",
       start_time: convertNormalTimeToUnixTime(startTime).toString(),
       end_time: convertNormalTimeToUnixTime(endTime).toString(),
     };
@@ -252,7 +252,8 @@ const Reports = () => {
                 endTime={endTime}
                 todayFormattedDate={todayFormattedDate}
               />
-              {total > 0 && <DistanceReport total={total} />}
+              {/* {total > 0 && <DistanceReport total={total} />} */}
+              <DistanceReport total={total} />
             </div>
           )}
         </div>

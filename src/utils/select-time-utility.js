@@ -1,13 +1,30 @@
+// export const formatDateTime = (date) => {
+//   return new Date(date).toLocaleString("en-US", {
+//     month: "short",
+//     date: "2-digit",
+//     year: "numeric",
+//     hour: "2-digit",
+//     minute: "2-digit",
+//     second: "2-digit",
+//     hour12: true,
+//   });
+// };
+
 export const formatDateTime = (date) => {
-  return new Date(date).toLocaleString("en-US", {
-    month: "short",
-    date: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true,
-  });
+  const validDate = new Date(date);
+
+  if (isNaN(validDate.getTime())) {
+    throw new Error("Invalid date provided");
+  }
+
+  const day = String(validDate.getDate()).padStart(2, '0');
+  const month = validDate.toLocaleString('default', { month: 'short' });
+  const year = validDate.getFullYear();
+  const hours = String(validDate.getHours()).padStart(2, '0');
+  const minutes = String(validDate.getMinutes()).padStart(2, '0');
+  const seconds = String(validDate.getSeconds()).padStart(2, '0');
+
+  return `${day} ${month} ${year} ${hours}:${minutes}:${seconds}`;
 };
 
 export const getTimeRange = (value) => {

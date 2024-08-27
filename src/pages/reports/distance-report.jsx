@@ -7,10 +7,12 @@ const DistanceReport = ({ total }) => {
   const handleDownloadPDF = () => {
     autoTable(doc, { html: "#report-table" });
     doc.save("reports.pdf");
-  };
+  };  
 
   return (
-    <div className="mt-6">
+    <>
+    {total > 0 ? (
+      <div className="mt-6">
       <table
         className="w-full text-left border border-separate rounded border-slate-200"
         cellSpacing="0"
@@ -88,6 +90,12 @@ const DistanceReport = ({ total }) => {
         New Save as PDF
       </button>
     </div>
+    ) : (<div className="w-full border flex justify-center items-center mt-8">
+      <h2 className="text-red-600 text-2xl p-4">No records found!</h2>
+    </div>)}
+    
+    
+    </>
   );
 };
 
