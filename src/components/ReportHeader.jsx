@@ -48,7 +48,6 @@ const ReportHeader = ({
           </dl>
         </div>
       </div>
-      {/* Convert All Button */}
     </div>
   );
 };
