@@ -2,14 +2,11 @@ import axios from "axios";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { SelectTime } from "../../constants/InfoData";
-import {
-  calculateDistance,
-  convertEpochToDate,
-} from "../../utils/calculate-distance";
 import { convertNormalTimeToUnixTime } from "../../utils/date-convertar";
 import { formatDateTime, getTimeRange } from "../../utils/select-time-utility";
 import { report_types } from "../../utils/static-data";
 import DistanceReport from "./distance-report";
+import TripReport from "./trip-report";
 
 const Reports = () => {
   const [userVehicle, setUserVehicle] = useState([]);
@@ -21,8 +18,7 @@ const Reports = () => {
   const [selectedVehicle, setSelectedVehicle] = useState("");
   const [selectReport, setSelectReport] = useState("");
 
-  console.log(selectReport);
-  
+  console.log(reports);
 
   const todayFormattedDate = useMemo(() => {
     return new Date().toLocaleDateString("en-US", {
@@ -59,6 +55,7 @@ const Reports = () => {
     setCurrentTime(formatDateTime(new Date()));
   }, [fetchUserVehicles]);
 
+  // Select time handle
   const handleSelectTimes = useCallback((e) => {
     const { value } = e.target;
     setSelectedTime(value);
@@ -67,11 +64,11 @@ const Reports = () => {
     setStartTime(startTime);
     setEndTime(endTime);
   }, []);
-
+  // Select Vehicle handler
   const handleVehicleChange = useCallback((event) => {
     setSelectedVehicle(event.target.value);
   }, []);
-
+  // Select Report type handler
   const handleSelectReport = useCallback((event) => {
     setSelectReport(event.target.value);
   }, []);
@@ -95,37 +92,64 @@ const Reports = () => {
       console.error("Error generating reports ", error);
     }
   };
+  // const groupedData = useMemo(() => {
+  //   const grouped = {};
 
-  const groupedData = useMemo(() => {
-    const grouped = {};
+  //   reports?.forEach((item, index) => {
+  //     const date = convertEpochToDate(item.time);
+  //     if (!grouped[date]) {
+  //       grouped[date] = 0; // Initialize total distance for the date
+  //     }
 
-    reports?.forEach((item, index) => {
-      const date = convertEpochToDate(item.time);
-      if (!grouped[date]) {
-        grouped[date] = 0; // Initialize total distance for the date
-      }
+  //     if (index > 0) {
+  //       const prevItem = reports[index - 1];
+  //       if (convertEpochToDate(prevItem.time) === date) {
+  //         const distance = calculateDistance(
+  //           parseFloat(prevItem.latitude),
+  //           parseFloat(prevItem.longitude),
+  //           parseFloat(item.latitude),
+  //           parseFloat(item.longitude),
+  //         );
+  //         grouped[date] += distance;
+  //       }
+  //     }
+  //   });
+  //   // Convert the grouped object to an array of { date, totalDistance } objects
+  //   return Object.keys(grouped).map((date) => ({
+  //     date,
+  //     totalDistance: grouped[date].toFixed(2),
+  //   }));
+  // }, [reports]);
 
-      if (index > 0) {
-        const prevItem = reports[index - 1];
-        if (convertEpochToDate(prevItem.time) === date) {
-          const distance = calculateDistance(
-            parseFloat(prevItem.latitude),
-            parseFloat(prevItem.longitude),
-            parseFloat(item.latitude),
-            parseFloat(item.longitude),
-          );
-          grouped[date] += distance;
-        }
-      }
-    });
-
-    // Convert the grouped object to an array of { date, totalDistance } objects
-    return Object.keys(grouped).map((date) => ({
-      date,
-      totalDistance: grouped[date].toFixed(2),
-    }));
-  }, [reports]);
-
+  const renderReportTable = () => {
+    switch (selectReport) {
+      case "distance-report":
+        return (
+          <DistanceReport
+          reports={reports}
+            // groupedData={groupedData}
+            selectReport={selectReport}
+            selectedVehicle={selectedVehicle}
+            startTime={startTime}
+            endTime={endTime}
+            todayFormattedDate={todayFormattedDate}
+          />
+        );
+      case "trip-report-in-details":
+        return (
+          <TripReport
+            reports={reports}
+            selectReport={selectReport}
+            selectedVehicle={selectedVehicle}
+            startTime={startTime}
+            endTime={endTime}
+            todayFormattedDate={todayFormattedDate}
+          />
+        );
+      default:
+        return null;
+    }
+  };
   return (
     <div className='bg-[#E9F8F3B2]'>
       <div className='w-full py-14 md:max-w-[1480px] m-auto max-w-[600px] px-4 md:px-0'>
@@ -252,14 +276,15 @@ const Reports = () => {
           </div>
           {isFormValid && (
             <div className='max-w-full mx-auto bg-white p-16 border mt-2'>
-              <DistanceReport
+              {/* <DistanceReport
                 groupedData={groupedData}
                 selectReport={selectReport}
                 selectedVehicle={selectedVehicle}
                 startTime={startTime}
                 endTime={endTime}
                 todayFormattedDate={todayFormattedDate}
-              />
+              /> */}
+              {renderReportTable()}
             </div>
           )}
         </div>

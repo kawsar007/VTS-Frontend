@@ -1,3 +1,18 @@
+export const formatEpochToDateForTripReport = (epochTime) => {
+  const date = new Date(epochTime * 1000);
+
+  const options = {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true,
+  };
+  return date.toLocaleString('en-US', options).replace(',', '');
+};
+
 // export const formatDateTime = (date) => {
 //   return new Date(date).toLocaleString("en-US", {
 //     month: "short",
