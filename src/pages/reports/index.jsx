@@ -7,6 +7,7 @@ import { formatDateTime, getTimeRange } from "../../utils/select-time-utility";
 import { report_types } from "../../utils/static-data";
 import DistanceReport from "./distance-report";
 import TripReport from "./trip-report";
+import TripReportSummary from "./trip-report-summary";
 
 const Reports = () => {
   const [userVehicle, setUserVehicle] = useState([]);
@@ -18,7 +19,7 @@ const Reports = () => {
   const [selectedVehicle, setSelectedVehicle] = useState("");
   const [selectReport, setSelectReport] = useState("");
 
-  console.log(reports);
+  console.log(selectReport);
 
   const todayFormattedDate = useMemo(() => {
     return new Date().toLocaleDateString("en-US", {
@@ -92,41 +93,13 @@ const Reports = () => {
       console.error("Error generating reports ", error);
     }
   };
-  // const groupedData = useMemo(() => {
-  //   const grouped = {};
-
-  //   reports?.forEach((item, index) => {
-  //     const date = convertEpochToDate(item.time);
-  //     if (!grouped[date]) {
-  //       grouped[date] = 0; // Initialize total distance for the date
-  //     }
-
-  //     if (index > 0) {
-  //       const prevItem = reports[index - 1];
-  //       if (convertEpochToDate(prevItem.time) === date) {
-  //         const distance = calculateDistance(
-  //           parseFloat(prevItem.latitude),
-  //           parseFloat(prevItem.longitude),
-  //           parseFloat(item.latitude),
-  //           parseFloat(item.longitude),
-  //         );
-  //         grouped[date] += distance;
-  //       }
-  //     }
-  //   });
-  //   // Convert the grouped object to an array of { date, totalDistance } objects
-  //   return Object.keys(grouped).map((date) => ({
-  //     date,
-  //     totalDistance: grouped[date].toFixed(2),
-  //   }));
-  // }, [reports]);
 
   const renderReportTable = () => {
     switch (selectReport) {
       case "distance-report":
         return (
           <DistanceReport
-          reports={reports}
+            reports={reports}
             // groupedData={groupedData}
             selectReport={selectReport}
             selectedVehicle={selectedVehicle}
@@ -138,6 +111,17 @@ const Reports = () => {
       case "trip-report-in-details":
         return (
           <TripReport
+            reports={reports}
+            selectReport={selectReport}
+            selectedVehicle={selectedVehicle}
+            startTime={startTime}
+            endTime={endTime}
+            todayFormattedDate={todayFormattedDate}
+          />
+        );
+      case "trip-report-summary":
+        return (
+          <TripReportSummary
             reports={reports}
             selectReport={selectReport}
             selectedVehicle={selectedVehicle}
@@ -276,14 +260,6 @@ const Reports = () => {
           </div>
           {isFormValid && (
             <div className='max-w-full mx-auto bg-white p-16 border mt-2'>
-              {/* <DistanceReport
-                groupedData={groupedData}
-                selectReport={selectReport}
-                selectedVehicle={selectedVehicle}
-                startTime={startTime}
-                endTime={endTime}
-                todayFormattedDate={todayFormattedDate}
-              /> */}
               {renderReportTable()}
             </div>
           )}
