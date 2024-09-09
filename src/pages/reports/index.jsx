@@ -125,8 +125,8 @@ const Reports = () => {
             reports={reports}
             selectReport={selectReport}
             selectedVehicle={selectedVehicle}
-            startTime={startTime}
-            endTime={endTime}
+            selectStartTime={startTime}
+            selectEndTime={endTime}
             todayFormattedDate={todayFormattedDate}
           />
         );
