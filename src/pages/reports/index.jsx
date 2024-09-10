@@ -20,7 +20,10 @@ const Reports = () => {
   const [selectReport, setSelectReport] = useState("");
   const [loading, setLoading] = useState(false);
 
-  console.log(selectReport);
+  console.log({
+    startTime: startTime,
+    endTime: endTime,
+  });
 
   const todayFormattedDate = useMemo(() => {
     return new Date().toLocaleDateString("en-US", {

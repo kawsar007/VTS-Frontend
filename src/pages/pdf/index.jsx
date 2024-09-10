@@ -1,34 +1,61 @@
-// import InvoiceComponent from "./InvoiceComponent";
-// import InvoiceData from "./InvoiceData";
-import { Document, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
+import { BlobProvider, PDFDownloadLink } from "@react-pdf/renderer";
+import { saveAs } from "file-saver";
+import { FiShare2 } from "react-icons/fi";
+import { HiOutlineDownload, HiOutlinePrinter } from "react-icons/hi";
+import PdfData from "./PdfData";
 
-// Create styles
-const styles = StyleSheet.create({
-  page: {
-    flexDirection: "row",
-    backgroundColor: "#E4E4E4",
-  },
-  section: {
-    margin: 10,
-    padding: 10,
-    flexGrow: 1,
-  },
-});
+const GeneratePdf = () => {
+  const styles = {
+    flex: { width: "100%", display: "flex", gap: "5px", alignItems: "center" },
+    btn: {
+      borderRadius: "3px",
+      border: "1px solid gray",
+      display: "flex",
+      alignItems: "center",
+      gap: "2px",
+      padding: "3px",
+      fontSize: "11px",
+      color: "#4f4f4f",
+      fontWeight: 600,
+      cursor: "pointer",
+      userSelect: "none",
+    },
+  };
 
-const PDFGenerate = () => {
+  const handleShare = async (blob) => {
+    await saveAs(blob, `invoice.pdf`);
+    window.location.href = `mailto:?subject=${encodeURIComponent(
+      `Invoice`,
+    )}&body=${encodeURIComponent(`Kindly find attached invoice`)}`;
+  };
+
   return (
-    <>
-      {/* <InvoiceComponent invoice={InvoiceData} /> */}
-      <Document>
-        <Page size='A4' style={styles.page}>
-          <View style={styles.section}>
-            <Text>Hello, React-PDF!</Text>
-            <Text>{`const greet = "Hello, World!";`}</Text>
-          </View>
-        </Page>
-      </Document>
-    </>
+    <div className='flex justify-center items-center gap-4 mt-10'>
+        <PDFDownloadLink document={<PdfData />} fileName='invoice.pdf'>
+          <div style={styles.btn}>
+            <HiOutlineDownload size={14} />
+            <span>Download</span>
+          </div>
+        </PDFDownloadLink>
+
+        <BlobProvider document={<PdfData />}>
+          {({ url, blob }) => (
+            <a href={url} target='_blank' style={styles.btn} rel='noreferrer'>
+              <HiOutlinePrinter size={14} />
+              <span>Print</span>
+            </a>
+          )}
+        </BlobProvider>
+        <BlobProvider document={<PdfData />}>
+          {({ url, blob }) => (
+            <div style={styles.btn} onClick={() => handleShare(url, blob)}>
+              <FiShare2 size={14} />
+              <span>Share</span>
+            </div>
+          )}
+        </BlobProvider>
+    </div>
   );
 };
 
-export default PDFGenerate;
+export default GeneratePdf;

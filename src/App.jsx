@@ -15,7 +15,7 @@ import Register from "./pages/auth/register";
 import HomePage from "./pages/home";
 import Profile from "./pages/profile";
 // import Tracking from "./pages/tracking/g-map";
-import PDFGenerate from "./pages/pdf";
+import GeneratePdf from "./pages/pdf";
 import Reports from "./pages/reports";
 import MapTracking from "./pages/tracking";
 import TestComp from "./test-comp";
@@ -53,7 +53,7 @@ const App = () => {
           path={ROUTESCONSTANTS.serviceCharge}
           element={<UnderConstruction />}
         />
-        <Route path="/pdf" element={<PDFGenerate />} />
+        <Route path="/pdf" element={<GeneratePdf />} />
       </Routes>
       <Footer />
     </div>
