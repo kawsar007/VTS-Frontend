@@ -18,6 +18,7 @@ const Reports = () => {
   const [reports, setReports] = useState([]);
   const [selectedVehicle, setSelectedVehicle] = useState("");
   const [selectReport, setSelectReport] = useState("");
+  const [loading, setLoading] = useState(false);
 
   console.log(selectReport);
 
@@ -84,6 +85,7 @@ const Reports = () => {
     };
 
     try {
+      setLoading(true)
       const response = await axios.post(
         `${import.meta.env.VITE_BASE_URL}report/raw-data`,
         requestBody,
@@ -91,6 +93,8 @@ const Reports = () => {
       setReports(response?.data?.data || []);
     } catch (error) {
       console.error("Error generating reports ", error);
+    } finally {
+      setLoading(false)
     }
   };
 
@@ -253,7 +257,7 @@ const Reports = () => {
                   // onClick={fetchVehicleReports}
                   disabled={!isFormValid}
                   className='text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800'>
-                  Generate Reports
+                 {loading ? "Loading..." : "Generate Reports"}
                 </button>
               </div>
             </form>

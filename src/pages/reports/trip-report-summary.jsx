@@ -10,6 +10,7 @@ const TripReportSummary = ({
   selectEndTime,
   todayFormattedDate,
 }) => {
+  console.log("Trip Reports--->", reports);
   const getTravelSegments = (reports) => {
     const segments = [];
     let currentSegment = {
@@ -92,6 +93,9 @@ const TripReportSummary = ({
   };
 
   const travelSegments = getTravelSegments(reports);
+
+  console.log(travelSegments);
+  
 
   // Calculate total distance
   const totalDistance = travelSegments.reduce(
