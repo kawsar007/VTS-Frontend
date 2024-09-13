@@ -1,6 +1,10 @@
 /* eslint-disable react/prop-types */
-
+import { BlobProvider, PDFDownloadLink } from "@react-pdf/renderer";
+import { saveAs } from "file-saver";
+import { FiShare2 } from "react-icons/fi";
+import { HiOutlineDownload, HiOutlinePrinter } from "react-icons/hi";
 import { formatEpochToDateForTripReport } from "../../utils/select-time-utility";
+import TripReportDocs from "./download-docs/trip-report-docs";
 
 const TripReport = ({
   reports,
@@ -11,6 +15,31 @@ const TripReport = ({
   todayFormattedDate,
 }) => {
   console.log("Trip Reports--->", reports);
+
+  // Style for PDF Btn
+  const styles = {
+    flex: { width: "100%", display: "flex", gap: "5px", alignItems: "center" },
+    btn: {
+      borderRadius: "3px",
+      border: "1px solid gray",
+      display: "flex",
+      alignItems: "center",
+      gap: "2px",
+      padding: "3px",
+      fontSize: "11px",
+      color: "#4f4f4f",
+      fontWeight: 600,
+      cursor: "pointer",
+      userSelect: "none",
+    },
+  };
+
+  const handleShare = async (blob) => {
+    await saveAs(blob, `invoice.pdf`);
+    window.location.href = `mailto:?subject=${encodeURIComponent(
+      `Invoice`,
+    )}&body=${encodeURIComponent(`Kindly find attached invoice`)}`;
+  };
 
   return (
     <>
@@ -58,6 +87,60 @@ const TripReport = ({
             </dl>
           </div>
         </div>
+
+        <div className='flex justify-between items-center gap-8'>
+          <PDFDownloadLink
+            document={
+              <TripReportDocs
+                reports={reports}
+                startTime={startTime}
+                endTime={endTime}
+                selectedVehicle={selectedVehicle}
+                todayFormattedDate={todayFormattedDate}
+              />
+            }
+            fileName='invoice.pdf'>
+            <div style={styles.btn}>
+              <HiOutlineDownload size={14} />
+              <span>Download</span>
+            </div>
+          </PDFDownloadLink>
+          <button className='py-2 px-4 border rounded-md'>Word</button>
+          <BlobProvider
+            document={
+              <TripReportDocs
+                reports={reports}
+                startTime={startTime}
+                endTime={endTime}
+                selectedVehicle={selectedVehicle}
+                todayFormattedDate={todayFormattedDate}
+              />
+            }>
+            {({ url }) => (
+              <a href={url} target='_blank' style={styles.btn} rel='noreferrer'>
+                <HiOutlinePrinter size={14} />
+                <span>Print</span>
+              </a>
+            )}
+          </BlobProvider>
+          <BlobProvider
+            document={
+              <TripReportDocs
+                reports={reports}
+                startTime={startTime}
+                endTime={endTime}
+                selectedVehicle={selectedVehicle}
+                todayFormattedDate={todayFormattedDate}
+              />
+            }>
+            {({ url, blob }) => (
+              <div style={styles.btn} onClick={() => handleShare(url, blob)}>
+                <FiShare2 size={14} />
+                <span>Share</span>
+              </div>
+            )}
+          </BlobProvider>
+        </div>
       </div>
 
       {reports.length > 0 ? (
@@ -97,7 +180,7 @@ const TripReport = ({
                     {report.speed}
                   </td>
                   <td className='whitespace-nowrap px-4 text-center py-2 text-gray-700'>
-                    {report?.pdop}
+                    00.00
                   </td>
                   <td className='whitespace-nowrap px-4 text-center py-2 text-gray-700'>
                     {report?.engine === 0 ? (
