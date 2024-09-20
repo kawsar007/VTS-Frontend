@@ -1,6 +1,11 @@
 /* eslint-disable react/prop-types */
 
+import { BlobProvider, PDFDownloadLink } from "@react-pdf/renderer";
+import { saveAs } from "file-saver";
+import { FiShare2 } from "react-icons/fi";
+import { HiOutlineDownload, HiOutlinePrinter } from "react-icons/hi";
 import { calculateDistance } from "../../utils/calculate-distance";
+import TripReportSummaryDocs from "./download-docs/trip-report-summary-docs";
 
 const TripReportSummary = ({
   reports,
@@ -95,7 +100,6 @@ const TripReportSummary = ({
   const travelSegments = getTravelSegments(reports);
 
   console.log(travelSegments);
-  
 
   // Calculate total distance
   const totalDistance = travelSegments.reduce(
@@ -103,8 +107,30 @@ const TripReportSummary = ({
     0,
   );
 
-  console.log(totalDistance);
+  // Style for PDF Btn
+  const styles = {
+    flex: { width: "100%", display: "flex", gap: "5px", alignItems: "center" },
+    btn: {
+      borderRadius: "3px",
+      border: "1px solid gray",
+      display: "flex",
+      alignItems: "center",
+      gap: "2px",
+      padding: "3px",
+      fontSize: "11px",
+      color: "#4f4f4f",
+      fontWeight: 600,
+      cursor: "pointer",
+      userSelect: "none",
+    },
+  };
 
+  const handleShare = async (blob) => {
+    await saveAs(blob, `invoice.pdf`);
+    window.location.href = `mailto:?subject=${encodeURIComponent(
+      `Invoice`,
+    )}&body=${encodeURIComponent(`Kindly find attached invoice`)}`;
+  };
   return (
     <>
       <div className='flex justify-between flex-wrap'>
@@ -150,6 +176,59 @@ const TripReportSummary = ({
               </div>
             </dl>
           </div>
+        </div>
+        <div className='flex justify-between items-center gap-8'>
+          <PDFDownloadLink
+            document={
+              <TripReportSummaryDocs
+                reports={travelSegments}
+                startTime={selectStartTime}
+                endTime={selectEndTime}
+                selectedVehicle={selectedVehicle}
+                todayFormattedDate={todayFormattedDate}
+              />
+            }
+            fileName='invoice.pdf'>
+            <div style={styles.btn}>
+              <HiOutlineDownload size={14} />
+              <span>Download</span>
+            </div>
+          </PDFDownloadLink>
+          <button className='py-2 px-4 border rounded-md'>Word</button>
+          <BlobProvider
+            document={
+              <TripReportSummaryDocs
+                reports={travelSegments}
+                startTime={selectStartTime}
+                endTime={selectEndTime}
+                selectedVehicle={selectedVehicle}
+                todayFormattedDate={todayFormattedDate}
+              />
+            }>
+            {({ url }) => (
+              <a href={url} target='_blank' style={styles.btn} rel='noreferrer'>
+                <HiOutlinePrinter size={14} />
+                <span>Print</span>
+              </a>
+            )}
+          </BlobProvider>
+          <BlobProvider
+            document={
+              <TripReportSummaryDocs
+                reports={travelSegments}
+                startTime={selectStartTime}
+                endTime={selectEndTime}
+                selectedVehicle={selectedVehicle}
+                todayFormattedDate={todayFormattedDate}
+              />
+            }>
+            {({ url, blob }) => (
+              <div style={styles.btn} onClick={() => handleShare(url, blob)}>
+                <FiShare2 size={14} />
+                <span>Share</span>
+              </div>
+            )}
+          </BlobProvider>
         </div>
       </div>
 
@@ -200,11 +279,9 @@ const TripReportSummary = ({
                   </td>
 
                   <td className='whitespace-nowrap text-center px-4 py-2 font-medium text-gray-900'>
-                    {/* {formatEpochToDateForTripReport(report.startTime || 'N/A')} */}
                     {report.startTime || "N/A"}
                   </td>
                   <td className='whitespace-nowrap px-4 text-center py-2 text-gray-700'>
-                    {/* {formatEpochToDateForTripReport(report.endTime || 'N/A')} */}
                     {report.endTime || "N/A"}
                   </td>
 
