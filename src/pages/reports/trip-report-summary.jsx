@@ -106,6 +106,8 @@ const TripReportSummary = ({
     (total, segment) => total + (segment.distance || 0),
     0,
   );
+  console.log(totalDistance);
+  
 
   // Style for PDF Btn
   const styles = {
