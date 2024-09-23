@@ -138,7 +138,7 @@ const Reports = () => {
             todayFormattedDate={todayFormattedDate}
           />
         );
-        case "engine-start-stop-report":
+        case "engine-stop/start-report":
         return (
           <EngineStartStopReport
             reports={reports}

@@ -14,6 +14,7 @@ const EngineStartStopReport = ({
   endTime,
   todayFormattedDate,
 }) => {
+console.log(reports);
 
   // Style for PDF Btn
   const styles = {
