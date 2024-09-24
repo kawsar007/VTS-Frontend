@@ -1,113 +1,115 @@
 /* eslint-disable react/prop-types */
-
 import { BlobProvider, PDFDownloadLink } from "@react-pdf/renderer";
 import { saveAs } from "file-saver";
+import { useEffect, useState } from "react";
 import { FiShare2 } from "react-icons/fi";
 import { HiOutlineDownload, HiOutlinePrinter } from "react-icons/hi";
-import { calculateDistance } from "../../utils/calculate-distance";
-import TripReportSummaryDocs from "./download-docs/trip-report-summary-docs";
+import { formatEpochToDateForTripReport } from "../../utils/select-time-utility";
+import { calculateDuration, formatDuration } from "../../utils/utility";
+import EngineStartStopDocs from "./download-docs/engine-start-stop-docs";
 
-const TripReportSummary = ({
+const EngineStartStopReport = ({
   reports,
+  // groupedData,
   selectReport,
   selectedVehicle,
-  selectStartTime,
-  selectEndTime,
+  startTime,
+  endTime,
   todayFormattedDate,
 }) => {
-  console.log("Trip Reports--->", reports);
-  const getTravelSegments = (reports) => {
-    const segments = [];
-    let currentSegment = {
-      startLocation: null,
-      startTimeEpoch: null,
-      startTime: null,
-      totalDistance: 0,
-      totalTime: 0,
-      maxSpeed: 0,
-      speeds: [],
-    };
+  const [engineStats, setEngineStats] = useState([]);
+  const [totalEngineOnTime, setTotalEngineOnTime] = useState(0);
+  const [totalEngineOffTime, setTotalEngineOffTime] = useState(0);
+  const [totalDistance, setTotalDistance] = useState(0);
+  console.log(reports);
+  console.log(formatDuration(totalEngineOnTime));
 
-    for (let i = 0; i < reports.length; i++) {
-      const report = reports[i];
+  useEffect(() => {
+    let engineOn = false;
+    let startTime = 0;
+    let stopTime = 0;
+    let distance = 0;
+    let totalSpeed = 0;
+    let speedCount = 0;
+    let maxSpeed = 0;
+    let totalEngineOnDuration = 0;
+    let totalEngineOffDuration = 0;
+    let lastEngineOffTime = 0;
 
-      if (report.engine === 1) {
-        if (!currentSegment.startLocation) {
-          currentSegment.startLocation = {
-            latitude: report.latitude,
-            longitude: report.longitude,
-          };
-          currentSegment.startTimeEpoch = report.time;
-          currentSegment.startTime = new Date(
-            report.time * 1000,
-          ).toLocaleString();
+    const stats = [];
+
+    reports.forEach((entry, index) => {
+      if (entry.engine === 1 && !engineOn) {
+        engineOn = true;
+        startTime = entry.time;
+        if (lastEngineOffTime) {
+          totalEngineOffDuration += calculateDuration(
+            lastEngineOffTime,
+            startTime,
+          );
         }
-
-        currentSegment.speeds.push(report.speed);
-      } else if (report.engine === 0 && currentSegment.startLocation) {
-        const endLocation = {
-          latitude: report.latitude,
-          longitude: report.longitude,
-        };
-        const distance = calculateDistance(
-          parseFloat(currentSegment.startLocation.latitude),
-          parseFloat(currentSegment.startLocation.longitude),
-          parseFloat(endLocation.latitude),
-          parseFloat(endLocation.longitude),
-        );
-        const duration = (report.time - currentSegment.startTimeEpoch) / 60; // Duration in minutes
-
-        segments.push({
-          startLocation: currentSegment.startLocation,
-          startTime: currentSegment.startTime,
-          endLocation,
-          endTime: new Date(report.time * 1000).toLocaleString(),
-          duration,
-          distance,
-          averageSpeed: distance / (duration / 60), // Average speed in km/h
-          maxSpeed: Math.max(...currentSegment.speeds), // Max speed in km/h
-        });
-
-        currentSegment = {
-          startLocation: null,
-          startTimeEpoch: null,
-          startTime: null,
-          totalDistance: 0,
-          totalTime: 0,
-          maxSpeed: 0,
-          speeds: [],
-        };
       }
+
+      if (engineOn && entry.engine === 0) {
+        engineOn = false;
+        stopTime = entry.time;
+
+        // calculate duration the engine was on
+        const duration = calculateDuration(startTime, stopTime);
+        totalEngineOnDuration += duration;
+
+        // Calculate distance traveled while the engine was on
+        const timeDiff = calculateDuration(reports[index - 1].time, entry.time);
+        distance += reports[index - 1].speed * (timeDiff / 3600);
+
+        // Calculate average speed during engine on
+        const avgSpeed = totalSpeed / speedCount;
+
+        stats.push({
+          startTime: formatEpochToDateForTripReport(startTime),
+          stopTime: formatEpochToDateForTripReport(stopTime),
+          duration: formatDuration(duration),
+          travelledDistance: distance.toFixed(2), // Keep two decimals for distance
+          avgSpeed: avgSpeed.toFixed(2),
+          maxSpeed: maxSpeed,
+          location: {
+            latitude: reports[index - 1].latitude,
+            longitude: reports[index - 1].longitude,
+          },
+        });
+        distance = 0;
+        totalSpeed = 0;
+        speedCount = 0;
+        maxSpeed = 0;
+        lastEngineOffTime = entry.time; // Track the engine off time
+      }
+
+      if (engineOn && index > 0) {
+        const timeDiff = calculateDuration(reports[index - 1].time, entry.time);
+        distance += entry.speed * (timeDiff / 3600); // Time in hours
+
+        totalSpeed += entry.speed;
+        speedCount += 1;
+
+        // Track the maximum speed
+        if (entry.speed > maxSpeed) {
+          maxSpeed = entry.speed;
+        }
+      }
+    });
+
+    // If the engine was off at the end, account for the last "Off" period
+    if (lastEngineOffTime && reports[reports.length - 1].engine === 0) {
+      totalEngineOffDuration += calculateDuration(
+        lastEngineOffTime,
+        reports[reports.length - 1].time,
+      );
     }
-
-    // Handle case where the last report ends with the engine still running
-    if (currentSegment.startLocation) {
-      segments.push({
-        startLocation: currentSegment.startLocation,
-        startTime: currentSegment.startTime,
-        endLocation: null,
-        endTime: null,
-        duration: null,
-        distance: null,
-        averageSpeed: null,
-        maxSpeed: null,
-      });
-    }
-
-    return segments;
-  };
-
-  const travelSegments = getTravelSegments(reports);
-
-  console.log(travelSegments);
-
-  // Calculate total distance
-  const totalDistance = travelSegments.reduce(
-    (total, segment) => total + (segment.distance || 0),
-    0,
-  );
-  console.log(totalDistance);
-  
+    setEngineStats(stats);
+    setTotalEngineOnTime(totalEngineOnDuration);
+    setTotalEngineOffTime(totalEngineOffDuration);
+    setTotalDistance(distance); // This will store the total distance
+  }, [reports]);
 
   // Style for PDF Btn
   const styles = {
@@ -133,13 +135,12 @@ const TripReportSummary = ({
       `Invoice`,
     )}&body=${encodeURIComponent(`Kindly find attached invoice`)}`;
   };
+
   return (
     <>
       <div className='flex justify-between flex-wrap'>
         <div>
-          <h2 className='text-3xl mb-4'>
-            TrustBD Technologies Ltd. Trip Report Summary
-          </h2>
+          <h2 className='text-3xl mb-4'>TrustBD Technologies Ltd.</h2>
           <div className='flow-root'>
             <dl className='-my-3 divide-y divide-gray-100 text-sm'>
               <div className='grid grid-cols-1 gap-1 py-3 even:bg-gray-50 sm:grid-cols-3 sm:gap-4'>
@@ -166,7 +167,7 @@ const TripReportSummary = ({
               <div className='grid grid-cols-1 gap-1 py-3 even:bg-gray-50 sm:grid-cols-3 sm:gap-4'>
                 <dt className='font-medium text-gray-900'>Report Time</dt>
                 <dd className='text-gray-700 sm:col-span-2'>
-                  : {selectStartTime} To {selectEndTime}
+                  : {startTime} To {endTime}
                 </dd>
               </div>
 
@@ -182,10 +183,10 @@ const TripReportSummary = ({
         <div className='flex justify-between items-center gap-8'>
           <PDFDownloadLink
             document={
-              <TripReportSummaryDocs
-                reports={travelSegments}
-                startTime={selectStartTime}
-                endTime={selectEndTime}
+              <EngineStartStopDocs
+                engineStats={engineStats}
+                startTime={startTime}
+                endTime={endTime}
                 selectedVehicle={selectedVehicle}
                 todayFormattedDate={todayFormattedDate}
               />
@@ -199,10 +200,10 @@ const TripReportSummary = ({
           <button className='py-2 px-4 border rounded-md'>Word</button>
           <BlobProvider
             document={
-              <TripReportSummaryDocs
-                reports={travelSegments}
-                startTime={selectStartTime}
-                endTime={selectEndTime}
+              <EngineStartStopDocs
+                engineStats={engineStats}
+                startTime={startTime}
+                endTime={endTime}
                 selectedVehicle={selectedVehicle}
                 todayFormattedDate={todayFormattedDate}
               />
@@ -216,10 +217,10 @@ const TripReportSummary = ({
           </BlobProvider>
           <BlobProvider
             document={
-              <TripReportSummaryDocs
-                reports={travelSegments}
-                startTime={selectStartTime}
-                endTime={selectEndTime}
+              <EngineStartStopDocs
+                engineStats={engineStats}
+                startTime={startTime}
+                endTime={endTime}
                 selectedVehicle={selectedVehicle}
                 todayFormattedDate={todayFormattedDate}
               />
@@ -234,28 +235,20 @@ const TripReportSummary = ({
         </div>
       </div>
 
-      {travelSegments.length > 0 ? (
+      {engineStats.length > 0 ? (
         <div className='overflow-x-auto rounded-lg border border-gray-200'>
           <table className='min-w-full divide-y-2 divide-gray-200 bg-white text-sm'>
             <thead className='ltr:text-left rtl:text-right'>
               <tr>
                 <th className='whitespace-nowrap px-4 py-2 font-medium text-gray-900'>
-                  Start Location
-                </th>
-                <th className='whitespace-nowrap px-4 py-2 font-medium text-gray-900'>
-                  End Location
-                </th>
-                <th className='whitespace-nowrap px-4 py-2 font-medium text-gray-900'>
-                  Start Time
-                </th>
-                <th className='whitespace-nowrap px-4 py-2 font-medium text-gray-900'>
-                  End Time
+                  Time Range
                 </th>
                 <th className='whitespace-nowrap px-4 py-2 font-medium text-gray-900'>
                   Duration
                 </th>
+
                 <th className='whitespace-nowrap px-4 py-2 font-medium text-gray-900'>
-                  Traveled Distance
+                  Travelled Distance
                 </th>
                 <th className='whitespace-nowrap px-4 py-2 font-medium text-gray-900'>
                   Avg. Speed
@@ -263,52 +256,67 @@ const TripReportSummary = ({
                 <th className='whitespace-nowrap px-4 py-2 font-medium text-gray-900'>
                   Max Speed
                 </th>
+                <th className='whitespace-nowrap px-4 py-2 font-medium text-gray-900'>
+                  Location
+                </th>
+                <th className='whitespace-nowrap px-4 py-2 font-medium text-gray-900'>
+                  Nearby Place
+                </th>
+                <th className='whitespace-nowrap px-4 py-2 font-medium text-gray-900'>
+                  Status
+                </th>
               </tr>
             </thead>
 
             <tbody className='divide-y divide-gray-200'>
-              {travelSegments.map((report, index) => (
+              {engineStats.map((report, index) => (
                 <tr key={index}>
-                  <td className='whitespace-nowrap text-center px-4 py-2 font-medium text-gray-900'>
-                    {report.startLocation
-                      ? `${report.startLocation.latitude}, ${report.startLocation.longitude}`
-                      : "N/A"}
+                  <td className='whitespace-nowrap text-start px-4 py-2 font-medium text-gray-900'>
+                    <span>{report?.startTime}</span>
+                    <br />
+                    <span>{report?.stopTime}</span>
                   </td>
                   <td className='whitespace-nowrap px-4 text-center py-2 text-gray-700'>
-                    {report.endLocation
-                      ? `${report.endLocation.latitude}, ${report.endLocation.longitude}`
-                      : "N/A"}
+                    {report.duration}
+                  </td>
+                  <td className='whitespace-nowrap text-center px-4 py-2 font-medium text-gray-900'>
+                    {report?.travelledDistance}km
                   </td>
 
+                  <td className='whitespace-nowrap px-4 text-center py-2 text-gray-700'>
+                    {report.avgSpeed} km/h
+                  </td>
                   <td className='whitespace-nowrap text-center px-4 py-2 font-medium text-gray-900'>
-                    {report.startTime || "N/A"}
+                    {report?.maxSpeed} km/h
                   </td>
-                  <td className='whitespace-nowrap px-4 text-center py-2 text-gray-700'>
-                    {report.endTime || "N/A"}
-                  </td>
-
                   <td className='whitespace-nowrap text-center px-4 py-2 font-medium text-gray-900'>
-                    {report.duration
-                      ? `${report.duration.toFixed(2)} minutes`
-                      : "N/A"}
+                    ({report?.location?.latitude},{report?.location?.longitude})
+                  </td>
+                  <td className='whitespace-nowrap text-center px-4 py-2 font-medium text-gray-900'>
+                    -
                   </td>
                   <td className='whitespace-nowrap px-4 text-center py-2 text-gray-700'>
-                    {report.distance
-                      ? `${report.distance.toFixed(2)} km`
-                      : "N/A"}
-                  </td>
-                  <td className='whitespace-nowrap px-4 text-center py-2 text-gray-700'>
-                    {report.averageSpeed
-                      ? `${report.averageSpeed.toFixed(2)} km/h`
-                      : "N/A"}
-                  </td>
-                  <td className='whitespace-nowrap px-4 text-center py-2 text-gray-700'>
-                    {report.maxSpeed ? `${report.maxSpeed} km/h` : "N/A"}
+                    Off
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+
+          <div className='w-1/2 bg-slate-500 py-4 px-10 rounded-lg text-white'>
+            <div className='flex justify-between items-center'>
+              <p>Engine On Time:</p>
+              <p>{formatDuration(totalEngineOnTime)}</p>
+            </div>
+            <div className='flex justify-between items-center'>
+              <p>Engine Off Time:</p>
+              <p>{formatDuration(totalEngineOffTime)}</p>
+            </div>
+            <div className='flex justify-between items-center'>
+              <p>Total Distance Traveled:</p>
+              <p>{totalDistance.toFixed(2)} km</p>
+            </div>
+          </div>
         </div>
       ) : (
         <div className='w-full border flex justify-center items-center mt-8'>
@@ -319,4 +327,4 @@ const TripReportSummary = ({
   );
 };
 
-export default TripReportSummary;
+export default EngineStartStopReport;

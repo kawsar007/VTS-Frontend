@@ -6,6 +6,7 @@ import { convertNormalTimeToUnixTime } from "../../utils/date-convertar";
 import { formatDateTime, getTimeRange } from "../../utils/select-time-utility";
 import { report_types } from "../../utils/static-data";
 import DistanceReport from "./distance-report";
+import EngineStartStopReport from "./engine-start-stop-report";
 import TripReport from "./trip-report";
 import TripReportSummary from "./trip-report-summary";
 
@@ -129,6 +130,17 @@ const Reports = () => {
       case "trip-report-summary":
         return (
           <TripReportSummary
+            reports={reports}
+            selectReport={selectReport}
+            selectedVehicle={selectedVehicle}
+            selectStartTime={startTime}
+            selectEndTime={endTime}
+            todayFormattedDate={todayFormattedDate}
+          />
+        );
+        case "engine-stop/start-report":
+        return (
+          <EngineStartStopReport
             reports={reports}
             selectReport={selectReport}
             selectedVehicle={selectedVehicle}

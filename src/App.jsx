@@ -7,7 +7,7 @@ import "react-toastify/dist/ReactToastify.min.css";
 import { ToastContainer } from "react-toastify";
 import UnderConstruction from "./common/under-construction";
 // import Navbar from "./components/Navbar";
-import Footer from "./components/footer";
+import Footer from "./components/Footer";
 import { ROUTESCONSTANTS } from "./constants/Routes";
 import ForgotPassword from "./pages/auth/forgot-password";
 import Login from "./pages/auth/login";
