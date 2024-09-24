@@ -1,7 +1,12 @@
 /* eslint-disable react/prop-types */
+import { BlobProvider, PDFDownloadLink } from "@react-pdf/renderer";
+import { saveAs } from "file-saver";
 import { useEffect, useState } from "react";
+import { FiShare2 } from "react-icons/fi";
+import { HiOutlineDownload, HiOutlinePrinter } from "react-icons/hi";
 import { formatEpochToDateForTripReport } from "../../utils/select-time-utility";
 import { calculateDuration, formatDuration } from "../../utils/utility";
+import EngineStartStopDocs from "./download-docs/engine-start-stop-docs";
 
 const EngineStartStopReport = ({
   reports,
@@ -12,9 +17,12 @@ const EngineStartStopReport = ({
   endTime,
   todayFormattedDate,
 }) => {
-  console.log(reports);
   const [engineStats, setEngineStats] = useState([]);
-  console.log("engineStats", engineStats);
+  const [totalEngineOnTime, setTotalEngineOnTime] = useState(0);
+  const [totalEngineOffTime, setTotalEngineOffTime] = useState(0);
+  const [totalDistance, setTotalDistance] = useState(0);
+  console.log(reports);
+  console.log(formatDuration(totalEngineOnTime));
 
   useEffect(() => {
     let engineOn = false;
@@ -24,6 +32,9 @@ const EngineStartStopReport = ({
     let totalSpeed = 0;
     let speedCount = 0;
     let maxSpeed = 0;
+    let totalEngineOnDuration = 0;
+    let totalEngineOffDuration = 0;
+    let lastEngineOffTime = 0;
 
     const stats = [];
 
@@ -31,15 +42,23 @@ const EngineStartStopReport = ({
       if (entry.engine === 1 && !engineOn) {
         engineOn = true;
         startTime = entry.time;
+        if (lastEngineOffTime) {
+          totalEngineOffDuration += calculateDuration(
+            lastEngineOffTime,
+            startTime,
+          );
+        }
       }
 
       if (engineOn && entry.engine === 0) {
         engineOn = false;
         stopTime = entry.time;
 
-        // calculate duration
+        // calculate duration the engine was on
         const duration = calculateDuration(startTime, stopTime);
+        totalEngineOnDuration += duration;
 
+        // Calculate distance traveled while the engine was on
         const timeDiff = calculateDuration(reports[index - 1].time, entry.time);
         distance += reports[index - 1].speed * (timeDiff / 3600);
 
@@ -62,6 +81,7 @@ const EngineStartStopReport = ({
         totalSpeed = 0;
         speedCount = 0;
         maxSpeed = 0;
+        lastEngineOffTime = entry.time; // Track the engine off time
       }
 
       if (engineOn && index > 0) {
@@ -77,33 +97,44 @@ const EngineStartStopReport = ({
         }
       }
     });
+
+    // If the engine was off at the end, account for the last "Off" period
+    if (lastEngineOffTime && reports[reports.length - 1].engine === 0) {
+      totalEngineOffDuration += calculateDuration(
+        lastEngineOffTime,
+        reports[reports.length - 1].time,
+      );
+    }
     setEngineStats(stats);
+    setTotalEngineOnTime(totalEngineOnDuration);
+    setTotalEngineOffTime(totalEngineOffDuration);
+    setTotalDistance(distance); // This will store the total distance
   }, [reports]);
 
   // Style for PDF Btn
-  // const styles = {
-  //   flex: { width: "100%", display: "flex", gap: "5px", alignItems: "center" },
-  //   btn: {
-  //     borderRadius: "3px",
-  //     border: "1px solid gray",
-  //     display: "flex",
-  //     alignItems: "center",
-  //     gap: "2px",
-  //     padding: "3px",
-  //     fontSize: "11px",
-  //     color: "#4f4f4f",
-  //     fontWeight: 600,
-  //     cursor: "pointer",
-  //     userSelect: "none",
-  //   },
-  // };
+  const styles = {
+    flex: { width: "100%", display: "flex", gap: "5px", alignItems: "center" },
+    btn: {
+      borderRadius: "3px",
+      border: "1px solid gray",
+      display: "flex",
+      alignItems: "center",
+      gap: "2px",
+      padding: "3px",
+      fontSize: "11px",
+      color: "#4f4f4f",
+      fontWeight: 600,
+      cursor: "pointer",
+      userSelect: "none",
+    },
+  };
 
-  // const handleShare = async (blob) => {
-  //   await saveAs(blob, `invoice.pdf`);
-  //   window.location.href = `mailto:?subject=${encodeURIComponent(
-  //     `Invoice`,
-  //   )}&body=${encodeURIComponent(`Kindly find attached invoice`)}`;
-  // };
+  const handleShare = async (blob) => {
+    await saveAs(blob, `invoice.pdf`);
+    window.location.href = `mailto:?subject=${encodeURIComponent(
+      `Invoice`,
+    )}&body=${encodeURIComponent(`Kindly find attached invoice`)}`;
+  };
 
   return (
     <>
@@ -149,11 +180,11 @@ const EngineStartStopReport = ({
             </dl>
           </div>
         </div>
-        {/* <div className='flex justify-between items-center gap-8'>
+        <div className='flex justify-between items-center gap-8'>
           <PDFDownloadLink
             document={
-              <DistanceReportDocs
-                reports={reports}
+              <EngineStartStopDocs
+                engineStats={engineStats}
                 startTime={startTime}
                 endTime={endTime}
                 selectedVehicle={selectedVehicle}
@@ -169,8 +200,8 @@ const EngineStartStopReport = ({
           <button className='py-2 px-4 border rounded-md'>Word</button>
           <BlobProvider
             document={
-              <DistanceReportDocs
-                reports={reports}
+              <EngineStartStopDocs
+                engineStats={engineStats}
                 startTime={startTime}
                 endTime={endTime}
                 selectedVehicle={selectedVehicle}
@@ -186,8 +217,8 @@ const EngineStartStopReport = ({
           </BlobProvider>
           <BlobProvider
             document={
-              <DistanceReportDocs
-                // reports={groupedData}
+              <EngineStartStopDocs
+                engineStats={engineStats}
                 startTime={startTime}
                 endTime={endTime}
                 selectedVehicle={selectedVehicle}
@@ -201,7 +232,7 @@ const EngineStartStopReport = ({
               </div>
             )}
           </BlobProvider>
-        </div> */}
+        </div>
       </div>
 
       {engineStats.length > 0 ? (
@@ -271,6 +302,21 @@ const EngineStartStopReport = ({
               ))}
             </tbody>
           </table>
+
+          <div className='w-1/2 bg-slate-500 py-4 px-10 rounded-lg text-white'>
+            <div className='flex justify-between items-center'>
+              <p>Engine On Time:</p>
+              <p>{formatDuration(totalEngineOnTime)}</p>
+            </div>
+            <div className='flex justify-between items-center'>
+              <p>Engine Off Time:</p>
+              <p>{formatDuration(totalEngineOffTime)}</p>
+            </div>
+            <div className='flex justify-between items-center'>
+              <p>Total Distance Traveled:</p>
+              <p>{totalDistance.toFixed(2)} km</p>
+            </div>
+          </div>
         </div>
       ) : (
         <div className='w-full border flex justify-center items-center mt-8'>
