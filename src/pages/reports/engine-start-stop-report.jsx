@@ -13,10 +13,12 @@ const EngineStartStopReport = ({
   // groupedData,
   selectReport,
   selectedVehicle,
-  startTime,
-  endTime,
+  selectStartTime,
+  selectEndTime,
   todayFormattedDate,
 }) => {
+  console.log(selectStartTime);
+
   const [engineStats, setEngineStats] = useState([]);
   const [totalEngineOnTime, setTotalEngineOnTime] = useState(0);
   const [totalEngineOffTime, setTotalEngineOffTime] = useState(0);
@@ -167,7 +169,7 @@ const EngineStartStopReport = ({
               <div className='grid grid-cols-1 gap-1 py-3 even:bg-gray-50 sm:grid-cols-3 sm:gap-4'>
                 <dt className='font-medium text-gray-900'>Report Time</dt>
                 <dd className='text-gray-700 sm:col-span-2'>
-                  : {startTime} To {endTime}
+                  : {selectStartTime} To {selectEndTime}
                 </dd>
               </div>
 
@@ -185,8 +187,8 @@ const EngineStartStopReport = ({
             document={
               <EngineStartStopDocs
                 engineStats={engineStats}
-                startTime={startTime}
-                endTime={endTime}
+                startTime={selectStartTime}
+                endTime={selectEndTime}
                 selectedVehicle={selectedVehicle}
                 todayFormattedDate={todayFormattedDate}
               />
@@ -202,8 +204,8 @@ const EngineStartStopReport = ({
             document={
               <EngineStartStopDocs
                 engineStats={engineStats}
-                startTime={startTime}
-                endTime={endTime}
+                startTime={selectStartTime}
+                endTime={selectEndTime}
                 selectedVehicle={selectedVehicle}
                 todayFormattedDate={todayFormattedDate}
               />
@@ -219,8 +221,8 @@ const EngineStartStopReport = ({
             document={
               <EngineStartStopDocs
                 engineStats={engineStats}
-                startTime={startTime}
-                endTime={endTime}
+                startTime={selectStartTime}
+                endTime={selectEndTime}
                 selectedVehicle={selectedVehicle}
                 todayFormattedDate={todayFormattedDate}
               />

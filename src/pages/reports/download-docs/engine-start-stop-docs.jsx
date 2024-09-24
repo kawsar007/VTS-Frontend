@@ -1,7 +1,11 @@
 /* eslint-disable react/prop-types */
-import { Document, Image, Page, Text, View } from "@react-pdf/renderer";
-import { styles } from "../../../common/reports-docs/styles";
-import logo from "./../../../assets/geon-logo.png";
+import { Document, Page, Text, View } from "@react-pdf/renderer";
+import {
+  InvoiceTitle,
+  ReportInfoTableBody,
+  ReportInfoTableHead,
+  styles,
+} from "../../../common/reports-docs/docsFile";
 
 const EngineStartStopDocs = ({
   engineStats,
@@ -10,67 +14,47 @@ const EngineStartStopDocs = ({
   selectedVehicle,
   todayFormattedDate,
 }) => {
-  const InvoiceTitle = () => (
-    <View style={styles.titleContainer}>
-      <View style={styles.spaceBetween}>
-        <Text style={styles.reportTitle}>Geon Technologies Ltd.</Text>
-        <Image style={styles.logo} src={logo} />
-      </View>
-    </View>
-  );
+  //   <div>
+  //     <View style={{ width: "100%", flexDirection: "row" }}>
+  //       <View style={[styles.tbody, styles.tbody2]}>
+  //         <Text>Vehicle</Text>
+  //       </View>
+  //       <View style={styles.tbody}>
+  //         <Text>: {selectedVehicle}</Text>
+  //       </View>
+  //     </View>
 
-  const InfoTableHead = () => (
-    <View style={{ width: "100%", flexDirection: "row", marginTop: 10 }}>
-      <View style={[styles.theader, styles.theader2]}>
-        <Text>Report Title</Text>
-      </View>
-      <View style={styles.theader}>
-        <Text>: Trip Report Summary</Text>
-      </View>
-    </View>
-  );
+  //     <View style={{ width: "100%", flexDirection: "row" }}>
+  //       <View style={[styles.tbody, styles.tbody2]}>
+  //         <Text>Owner</Text>
+  //       </View>
+  //       <View style={styles.tbody}>
+  //         <Text>: Milk Vita (milkvita)</Text>
+  //       </View>
+  //     </View>
 
-  const InfoTableBody = () => (
-    <div>
-      <View style={{ width: "100%", flexDirection: "row" }}>
-        <View style={[styles.tbody, styles.tbody2]}>
-          <Text>Vehicle</Text>
-        </View>
-        <View style={styles.tbody}>
-          <Text>: {selectedVehicle}</Text>
-        </View>
-      </View>
-
-      <View style={{ width: "100%", flexDirection: "row" }}>
-        <View style={[styles.tbody, styles.tbody2]}>
-          <Text>Owner</Text>
-        </View>
-        <View style={styles.tbody}>
-          <Text>: Milk Vita (milkvita)</Text>
-        </View>
-      </View>
-
-      <View style={{ width: "100%", flexDirection: "row" }}>
-        <View style={[styles.tbody, styles.tbody2]}>
-          <Text>Report Time</Text>
-        </View>
-        <View style={styles.tbody}>
-          <Text>
-            {startTime} - {endTime}
-          </Text>
-        </View>
-      </View>
-      <View style={{ width: "100%", flexDirection: "row" }}>
-        <View style={[styles.tbody, styles.tbody2]}>
-          <Text>Report Date</Text>
-        </View>
-        <View style={styles.tbody}>
-          <Text> {todayFormattedDate} </Text>
-        </View>
-      </View>
-    </div>
-  );
-
+  //     <View style={{ width: "100%", flexDirection: "row" }}>
+  //       <View style={[styles.tbody, styles.tbody2]}>
+  //         <Text>Report Time</Text>
+  //       </View>
+  //       <View style={styles.tbody}>
+  //         <Text>
+  //           {startTime} - {endTime}
+  //         </Text>
+  //       </View>
+  //     </View>
+  //     <View style={{ width: "100%", flexDirection: "row" }}>
+  //       <View style={[styles.tbody, styles.tbody2]}>
+  //         <Text>Report Date</Text>
+  //       </View>
+  //       <View style={styles.tbody}>
+  //         <Text> {todayFormattedDate} </Text>
+  //       </View>
+  //     </View>
+  //   </div>
+  // );
+  console.log({startTime, endTime});
+  
   const TableHead = () => (
     <View style={{ width: "100%", flexDirection: "row", marginTop: 10 }}>
       <View style={[styles.theader, styles.theader2]}>
@@ -135,8 +119,18 @@ const EngineStartStopDocs = ({
     <Document>
       <Page size='A4' style={styles.page}>
         <InvoiceTitle />
-        <InfoTableHead />
-        <InfoTableBody />
+        <ReportInfoTableHead
+          title='Report Title'
+          subtitle='Engine Start and Stop Report.'
+        />
+        <ReportInfoTableBody
+          infoData={[
+            { label: "Vehicle", value: selectedVehicle },
+            { label: "Owner", value: "Milk Vita (milkvita)" },
+            { label: "Report Time", value: `${startTime} - ${endTime}` },
+            { label: "Report Date", value: todayFormattedDate },
+          ]}
+        />
         <TableHead />
         <TableBody />
       </Page>

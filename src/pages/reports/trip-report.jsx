@@ -167,7 +167,7 @@ const TripReport = ({
             </thead>
 
             <tbody className='divide-y divide-gray-200'>
-              {reports.map((report, index) => (
+              {reports.slice(0,10).map((report, index) => (
                 <tr key={index}>
                   <td className='whitespace-nowrap text-center px-4 py-2 font-medium text-gray-900'>
                     {formatEpochToDateForTripReport(report.time)}

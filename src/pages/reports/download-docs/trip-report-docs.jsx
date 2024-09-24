@@ -1,8 +1,7 @@
 /* eslint-disable react/prop-types */
-import { Document, Image, Page, Text, View } from "@react-pdf/renderer";
-import { styles } from "../../../common/reports-docs/styles";
+import { Document, Page, Text, View } from "@react-pdf/renderer";
+import { InvoiceTitle, ReportInfoTableBody, ReportInfoTableHead, styles } from "../../../common/reports-docs/docsFile";
 import { formatEpochToDateForTripReport } from "../../../utils/select-time-utility";
-import logo from "./../../../assets/geon-logo.png";
 // import { invoice_data } from "./InvoiceData";
 
 const TripReportDocs = ({
@@ -12,67 +11,6 @@ const TripReportDocs = ({
   selectedVehicle,
   todayFormattedDate,
 }) => {
-  const InvoiceTitle = () => (
-    <View style={styles.titleContainer}>
-      <View style={styles.spaceBetween}>
-        <Text style={styles.reportTitle}>Geon Technologies Ltd.</Text>
-        <Image style={styles.logo} src={logo} />
-      </View>
-    </View>
-  );
-
-  const InfoTableHead = () => (
-    <View style={{ width: "100%", flexDirection: "row", marginTop: 10 }}>
-      <View style={[styles.theader, styles.theader2]}>
-        <Text>Report Title</Text>
-      </View>
-      <View style={styles.theader}>
-        <Text>: Trip Report Summary</Text>
-      </View>
-    </View>
-  );
-
-  const InfoTableBody = () => (
-    <div>
-      <View style={{ width: "100%", flexDirection: "row" }}>
-        <View style={[styles.tbody, styles.tbody2]}>
-          <Text>Vehicle</Text>
-        </View>
-        <View style={styles.tbody}>
-          <Text>: {selectedVehicle}</Text>
-        </View>
-      </View>
-
-      <View style={{ width: "100%", flexDirection: "row" }}>
-        <View style={[styles.tbody, styles.tbody2]}>
-          <Text>Owner</Text>
-        </View>
-        <View style={styles.tbody}>
-          <Text>: Milk Vita (milkvita)</Text>
-        </View>
-      </View>
-
-      <View style={{ width: "100%", flexDirection: "row" }}>
-        <View style={[styles.tbody, styles.tbody2]}>
-          <Text>Report Time</Text>
-        </View>
-        <View style={styles.tbody}>
-          <Text>
-            {startTime} - {endTime}
-          </Text>
-        </View>
-      </View>
-      <View style={{ width: "100%", flexDirection: "row" }}>
-        <View style={[styles.tbody, styles.tbody2]}>
-          <Text>Report Date</Text>
-        </View>
-        <View style={styles.tbody}>
-          <Text> {todayFormattedDate} </Text>
-        </View>
-      </View>
-    </div>
-  );
-
   const TableHead = () => (
     <View style={{ width: "100%", flexDirection: "row", marginTop: 10 }}>
       <View style={[styles.theader, styles.theader2]}>
@@ -93,7 +31,7 @@ const TripReportDocs = ({
     </View>
   );
   const TableBody = () =>
-    reports.map((report) => (
+    reports.slice(0, 10).map((report) => (
       <div key={report.id}>
         <View style={{ width: "100%", flexDirection: "row" }}>
           <View style={[styles.tbody, styles.tbody2]}>
@@ -143,8 +81,15 @@ const TripReportDocs = ({
     <Document>
       <Page size='A4' style={styles.page}>
         <InvoiceTitle />
-        <InfoTableHead />
-        <InfoTableBody />
+        <ReportInfoTableHead title='Report Title' subtitle='Trip Report Details.' />
+        <ReportInfoTableBody
+          infoData={[
+            { label: "Vehicle", value: selectedVehicle },
+            { label: "Owner", value: "Milk Vita (milkvita)" },
+            { label: "Report Time", value: `${startTime} - ${endTime}` },
+            { label: "Report Date", value: todayFormattedDate },
+          ]}
+        />
         <TableHead />
         <TableBody />
         {/* <TableTotal /> */}
