@@ -201,8 +201,8 @@ const DistanceReport = ({
           </table>
         </div>
       ) : (
-        <div className='w-full border flex justify-center items-center mt-8'>
-          <h2 className='text-red-600 text-2xl p-4'>No records found!</h2>
+        <div className='flex justify-center items-center mt-4 h-48 bg-gray-100 rounded-md border border-gray-300'>
+          <p className='text-gray-600 text-lg'>No data available to display.</p>
         </div>
       )}
     </>
