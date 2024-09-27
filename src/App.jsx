@@ -15,6 +15,7 @@ import Register from "./pages/auth/register";
 import HomePage from "./pages/home";
 import Profile from "./pages/profile";
 // import Tracking from "./pages/tracking/g-map";
+import Navbar from "./components/Navbar";
 import GeneratePdf from "./pages/pdf";
 import Reports from "./pages/reports";
 import MapTracking from "./pages/tracking";
@@ -24,7 +25,7 @@ const App = () => {
   return (
     <div>
       <ToastContainer autoClose={3500} />
-      {/* <Navbar /> */}
+      <Navbar />
       <Routes>
         <Route path="/home" element={<HomePage />} />
         {/* <Route path="/" element={<LandingPage />} /> */}

@@ -96,7 +96,7 @@ const Login = () => {
       initialValues.user_name = savedUsername;
       initialValues.password = savedPassword;
     }
-  }, []);
+  }, [initialValues]);
 
   // Redirect after login
   if (logedInUser) {
