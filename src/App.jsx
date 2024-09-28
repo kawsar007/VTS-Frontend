@@ -17,6 +17,9 @@ import Profile from "./pages/profile";
 // import Tracking from "./pages/tracking/g-map";
 // import Navbar from "./components/Navbar";
 import Admin from "./pages/admin";
+import AdminLayout from "./pages/admin/AdminLayout";
+import { Guides } from "./pages/admin/Test";
+import Users from "./pages/admin/users";
 import GeneratePdf from "./pages/pdf";
 import Reports from "./pages/reports";
 import MapTracking from "./pages/tracking";
@@ -45,7 +48,11 @@ const App = () => {
           path={ROUTESCONSTANTS.operation}
           element={<UnderConstruction />}
         />
-        <Route path={ROUTESCONSTANTS.admin} element={<Admin />} />
+        <Route path={ROUTESCONSTANTS.admin} element={<AdminLayout />}>
+        <Route path="dashboard" element={<Admin />} />
+          <Route path="users" element={<Users />} />
+          <Route path="guides" element={<Guides />} />
+        </Route>
         <Route path={ROUTESCONSTANTS.profile} element={<Profile />} />
         <Route
           path={ROUTESCONSTANTS.accounting}

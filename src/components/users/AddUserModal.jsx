@@ -1,8 +1,8 @@
 /* eslint-disable react/prop-types */
 import { useEffect, useRef, useState } from "react";
-import ModalCloseButton from "./modal-close-button";
+import ModalCloseButton from "./ModalCloseButton";
 
-export default function AddModal(props) {
+export default function AddUserModal(props) {
   console.log(props);
 
   const { showModal, setShowModal, text } = props;
