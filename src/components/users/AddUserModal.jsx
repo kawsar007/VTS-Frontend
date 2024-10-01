@@ -1,8 +1,8 @@
 /* eslint-disable react/prop-types */
-import { yupResolver } from "@hookform/resolvers/yup";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import * as yup from "yup";
+import { toast } from "react-toastify";
+import { axiosOpen } from "../../api/axios";
 import FormSubmitButton from "../../common/FormSubmitButton";
 import InputField from "../../common/InputField";
 import ModalCloseButton from "./ModalCloseButton";
@@ -11,31 +11,49 @@ export default function AddUserModal(props) {
   const { showModal, setShowModal, text } = props;
   const [loading, setLoading] = useState(false);
 
+  console.log(loading);
+  const userId = 12;
+  
+
   // Validation schema using Yup
-  const schema = yup.object().shape({
-    name: yup.string().required("Name is required"),
-    email: yup.string().email("Invalid email").required("Email is required"),
-    address: yup.string().required("Address is required"),
-    phone: yup
-      .string()
-      .required("Phone number is required")
-      .matches(/^\d+$/, "Phone number must be digits"),
-  });
+  // const schema = yup.object().shape({
+  //   first_name: yup.string().required("First Name is required"),
+  //   last_name: yup.string().required("Last Name is required"),
+  //   user_name: yup.string().required("Username is required"),
+  //   email: yup.string().email("Invalid email").required("Email is required"),
+  //   address_line_one: yup.string().required("Address Line One is required"),
+  //   address_line_two: yup.string(),
+  //   division: yup.string().required("Division is required"),
+  //   district: yup.string().required("District is required"),
+  //   phone: yup
+  //     .string()
+  //     .required("Phone number is required")
+  //     .matches(/^\d+$/, "Phone number must be digits"),
+  //   role: yup.string().required("Role is required"),
+  //   is_active: yup.string().required("Status is required"),
+  //   password: yup
+  //     .string()
+  //     .required("Password is required")
+  //     .min(8, "Password must be at least 8 characters"),
+  // });
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm({
-    resolver: yupResolver(schema),
-  });
+  } = useForm();
 
   // Handle form submission
-  const onSubmit = (data) => {
-    setLoading(true);
-    // Process the form data
-    console.log(data);
-    setLoading(false);
+  const onSubmit = async (data) => {
+    try {
+      const response = await axiosOpen.post(`/user/create/info?id=${userId}`, data);
+      // console.log('User added successfully:', response.data);
+      toast.success(response.data);
+      // Optionally, close the modal or reset the form here
+    } catch (error) {
+      console.error('Error adding user:', error);
+      // Handle error appropriately
+    }
   };
 
   // ===== click outside of dropdown =====
@@ -76,10 +94,10 @@ export default function AddUserModal(props) {
                 <div className='mt-2 gap-5 items-center md:flex'>
                   <div className='flex w-full flex-col md:w-1/2'>
                     <InputField
-                      label='Name'
-                      name='name'
+                      label='First Name'
+                      name='first_name'
                       type='text'
-                      placeholder='Enter physician name'
+                      placeholder='Enter first name'
                       register={register}
                       errors={errors}
                     />
@@ -92,13 +110,81 @@ export default function AddUserModal(props) {
                       register={register}
                       errors={errors}
                     />
+                    <InputField
+                      label='Address Line One'
+                      name='address_line_one'
+                      type='text'
+                      placeholder='Enter address one'
+                      register={register}
+                      errors={errors}
+                    />
+                    <InputField
+                      label='Division'
+                      name='division'
+                      type='text'
+                      placeholder='Enter Division'
+                      register={register}
+                      errors={errors}
+                    />
+                    <InputField
+                      label='Password'
+                      name='password'
+                      type='password'
+                      placeholder='Enter password'
+                      register={register}
+                      errors={errors}
+                    />
+                    <div className='mt-4'>
+                      <label className='mb-2 block font-satoshi text-base font-medium text-dark'>
+                        Role
+                      </label>
+                      <select
+                        {...register("role")}
+                        className={`mt-1 block w-full rounded-md border p-[10px] sm:text-sm ${
+                          errors.role ? "border-red-500" : ""
+                        }`}>
+                        <option value=''>Select Role</option>
+                        <option value='admin'>Admin</option>
+                        <option value='user'>User</option>
+                        <option value='owner'>Owner</option>
+                      </select>
+                      {errors.role && (
+                        <p className='text-red-500 text-sm'>
+                          {errors.role.message}
+                        </p>
+                      )}
+                    </div>
                   </div>
                   <div className='flex w-full flex-col md:w-1/2'>
                     <InputField
-                      label='Address'
-                      name='address'
+                      label='Last Name'
+                      name='last_name'
                       type='text'
-                      placeholder='Enter your address'
+                      placeholder='Enter first name'
+                      register={register}
+                      errors={errors}
+                    />
+                    <InputField
+                      label='Username'
+                      name='user_name'
+                      type='text'
+                      placeholder='Enter your username'
+                      register={register}
+                      errors={errors}
+                    />
+                    <InputField
+                      label='Address Line Two'
+                      name='address_line_two'
+                      type='text'
+                      placeholder='Enter address two'
+                      register={register}
+                      errors={errors}
+                    />
+                    <InputField
+                      label='District'
+                      name='district'
+                      type='text'
+                      placeholder='Enter District'
                       register={register}
                       errors={errors}
                     />
@@ -110,6 +196,25 @@ export default function AddUserModal(props) {
                       register={register}
                       errors={errors}
                     />
+                    <div className='mt-4'>
+                      <label className='mb-2 block font-satoshi text-base font-medium text-dark'>
+                        Status
+                      </label>
+                      <select
+                        {...register("status")}
+                        className={`mt-1 block w-full rounded-md border p-[10px] sm:text-sm ${
+                          errors.status ? "border-red-500" : ""
+                        }`}>
+                        <option value=''>Select Status</option>
+                        <option value='1'>Active</option>
+                        <option value='0'>Inactive</option>
+                      </select>
+                      {errors.status && (
+                        <p className='text-red-500 text-sm'>
+                          {errors.status.message}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <div className='mt-11'>

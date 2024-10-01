@@ -1,14 +1,53 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { axiosOpen } from "../../../api/axios";
 import TableHeader from "../../../common/table-ingredients/table-header";
 import AddUserModal from "../../../components/users/AddUserModal";
-import { VehicleInfoData } from "../../../utils/fake_db";
+const GET_ALL_USER = "user/all-user/info";
 
 const Users = () => {
   const [showModal, setShowModal] = useState(false);
+  const [allUsers, setAllUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null); // Error state
+
+  console.log(allUsers);
+  
+
+  useEffect(() => {
+    const fetchAllUsers = async () => {
+      try {
+        const response = await axiosOpen.get(GET_ALL_USER, {
+          params: {
+            "id": "12", // Login user id
+          },
+        });
+        setAllUsers(response.data?.data);
+        console.log(response.data.data);
+        
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAllUsers();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>; // Show loading while user data is being fetched
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>; // Show error message if there's an error
+  }
 
   return (
     <>
-      <TableHeader title='All Users' showModal={showModal} setShowModal={setShowModal} />
+      <TableHeader
+        title='All Users'
+        showModal={showModal}
+        setShowModal={setShowModal}
+      />
 
       <div className='rounded-lg border border-gray-200'>
         <div className='overflow-x-auto rounded-t-lg'>
@@ -19,43 +58,55 @@ const Users = () => {
                   SL
                 </th>
                 <th className='whitespace-nowrap px-4 py-2 font-medium text-gray-900'>
-                  Number Plate
+                  Name
                 </th>
                 <th className='whitespace-nowrap px-4 py-2 font-medium text-gray-900'>
-                  Vehicle Code
+                  Email
                 </th>
                 <th className='whitespace-nowrap px-4 py-2 font-medium text-gray-900'>
-                  Status
+                  Phone
                 </th>
                 <th className='whitespace-nowrap px-4 py-2 font-medium text-gray-900'>
-                  Speed Limit
+                  Address
                 </th>
                 <th className='whitespace-nowrap px-4 py-2 font-medium text-gray-900'>
-                  Driver
+                  Role
+                </th>
+                <th className='whitespace-nowrap px-4 py-2 font-medium text-gray-900'>
+                  Username
+                </th>
+                <th className='whitespace-nowrap px-4 py-2 font-medium text-gray-900'>
+                  Action
                 </th>
               </tr>
             </thead>
 
             <tbody className='divide-y divide-gray-200 text-center'>
-              {VehicleInfoData.map((vehicle, i) => (
+              {allUsers.map((user, i) => (
                 <tr key={i}>
                   <td className='whitespace-nowrap px-4 py-2 font-medium text-gray-900'>
-                    {vehicle?.sl}
+                    {i + 1}
                   </td>
                   <td className='whitespace-nowrap px-4 py-2 text-gray-700'>
-                    {vehicle?.number_plate}
+                    {user?.name}
                   </td>
                   <td className='whitespace-nowrap px-4 py-2 text-gray-700'>
-                    {vehicle?.vehicle_code}
+                    {user?.email}
                   </td>
                   <td className='whitespace-nowrap px-4 py-2 text-gray-700'>
-                    {vehicle?.status}
+                    {user?.phone}
                   </td>
                   <td className='whitespace-nowrap px-4 py-2 text-gray-700'>
-                    {vehicle?.speed_limit}
+                    {user?.address}
                   </td>
                   <td className='whitespace-nowrap px-4 py-2 text-gray-700'>
-                    {vehicle?.driver}
+                    {user?.role}
+                  </td>
+                  <td className='whitespace-nowrap px-4 py-2 text-gray-700'>
+                    {user?.user_name}
+                  </td>
+                  <td className='whitespace-nowrap px-4 py-2 text-gray-700'>
+                    Delete
                   </td>
                 </tr>
               ))}
