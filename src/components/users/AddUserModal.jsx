@@ -198,12 +198,12 @@ export default function AddUserModal(props) {
                     />
                     <div className='mt-4'>
                       <label className='mb-2 block font-satoshi text-base font-medium text-dark'>
-                        Status
+                        Is Active
                       </label>
                       <select
-                        {...register("status")}
+                        {...register("is_active")}
                         className={`mt-1 block w-full rounded-md border p-[10px] sm:text-sm ${
-                          errors.status ? "border-red-500" : ""
+                          errors.is_active ? "border-red-500" : ""
                         }`}>
                         <option value=''>Select Status</option>
                         <option value='1'>Active</option>
@@ -211,7 +211,7 @@ export default function AddUserModal(props) {
                       </select>
                       {errors.status && (
                         <p className='text-red-500 text-sm'>
-                          {errors.status.message}
+                          {errors.is_active.message}
                         </p>
                       )}
                     </div>
