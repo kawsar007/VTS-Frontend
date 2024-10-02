@@ -1,29 +1,32 @@
 import { useEffect, useState } from "react";
+import { MdDelete } from "react-icons/md";
+import { toast } from "react-toastify";
 import { axiosOpen } from "../../../api/axios";
+import DeleteModal from "../../../common/DeleteModal";
 import TableHeader from "../../../common/table-ingredients/table-header";
 import AddUserModal from "../../../components/users/AddUserModal";
 const GET_ALL_USER = "user/all-user/info";
 
 const Users = () => {
   const [showModal, setShowModal] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false); // State for delete modal
+  const [userToDelete, setUserToDelete] = useState(null); // Track which user to delete
   const [allUsers, setAllUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null); // Error state
 
   console.log(allUsers);
-  
 
   useEffect(() => {
     const fetchAllUsers = async () => {
       try {
         const response = await axiosOpen.get(GET_ALL_USER, {
           params: {
-            "id": "12", // Login user id
+            id: "12", // Login user id
           },
         });
         setAllUsers(response.data?.data);
         console.log(response.data.data);
-        
       } catch (error) {
         setError(error.message);
       } finally {
@@ -33,12 +36,31 @@ const Users = () => {
     fetchAllUsers();
   }, []);
 
+  const userId = 12;
+
+  const handleDelete = async () => {
+    try {
+      // Make an API call to delete the user
+      const res = await axiosOpen.post(`/user/delete/info?id=${userId}`, {
+        user_id: userToDelete.id,
+      });
+
+      // console.log();
+      setAllUsers(allUsers.filter((user) => user.id !== userToDelete.id)); // Remove user from state
+      toast.success(res?.data?.data);
+    } catch (error) {
+      console.error("Error deleting user:", error);
+    } finally {
+      setDeleteModalOpen(false); // Close modal after deletion
+    }
+  };
+
   if (loading) {
-    return <div>Loading...</div>; // Show loading while user data is being fetched
+    return <div>Loading...</div>;
   }
 
   if (error) {
-    return <div>Error: {error}</div>; // Show error message if there's an error
+    return <div>Error: {error}</div>;
   }
 
   return (
@@ -106,7 +128,14 @@ const Users = () => {
                     {user?.user_name}
                   </td>
                   <td className='whitespace-nowrap px-4 py-2 text-gray-700'>
-                    Delete
+                    <span
+                      className='cursor-pointer flex items-center justify-center text-red-500'
+                      onClick={() => {
+                        setUserToDelete(user);
+                        setDeleteModalOpen(true); // Open delete modal
+                      }}>
+                      <MdDelete size={24} />
+                    </span>
                   </td>
                 </tr>
               ))}
@@ -184,6 +213,13 @@ const Users = () => {
           </ol>
         </div>
       </div>
+
+      <DeleteModal
+        isOpen={deleteModalOpen}
+        itemName={userToDelete?.name}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={handleDelete}
+      />
 
       {showModal && (
         <AddUserModal

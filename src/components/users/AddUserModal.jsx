@@ -3,8 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { axiosOpen } from "../../api/axios";
-import FormSubmitButton from "../../common/FormSubmitButton";
 import InputField from "../../common/InputField";
+import LoadingButton from "../../common/LoadingButton";
 import ModalCloseButton from "./ModalCloseButton";
 
 export default function AddUserModal(props) {
@@ -13,7 +13,6 @@ export default function AddUserModal(props) {
 
   console.log(loading);
   const userId = 12;
-  
 
   // Validation schema using Yup
   // const schema = yup.object().shape({
@@ -45,14 +44,20 @@ export default function AddUserModal(props) {
 
   // Handle form submission
   const onSubmit = async (data) => {
+    setLoading(true);
     try {
-      const response = await axiosOpen.post(`/user/create/info?id=${userId}`, data);
-      // console.log('User added successfully:', response.data);
-      toast.success(response.data);
+      const response = await axiosOpen.post(
+        `/user/create/info?id=${userId}`,
+        data,
+      );
+      console.log(response.data);
+      toast.success(response.data?.message);
       // Optionally, close the modal or reset the form here
     } catch (error) {
-      console.error('Error adding user:', error);
+      console.error("Error adding user:", error);
       // Handle error appropriately
+    } finally {
+      setLoading(false); // Stop loading after the API call
     }
   };
 
@@ -218,7 +223,13 @@ export default function AddUserModal(props) {
                   </div>
                 </div>
                 <div className='mt-11'>
-                  <FormSubmitButton>Add User </FormSubmitButton>
+                  {/* <FormSubmitButton>Add User </FormSubmitButton> */}
+                  <LoadingButton
+                    isLoading={loading}
+                    text='Add User'
+                    loadingText='Adding User...'
+                    type='submit'
+                  />
                 </div>
               </form>
             </div>
