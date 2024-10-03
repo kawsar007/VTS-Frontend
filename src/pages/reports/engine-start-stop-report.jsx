@@ -4,6 +4,7 @@ import { saveAs } from "file-saver";
 import { useEffect, useState } from "react";
 import { FiShare2 } from "react-icons/fi";
 import { HiOutlineDownload, HiOutlinePrinter } from "react-icons/hi";
+import THead from "../../common/table-ingredients/tHead";
 import { formatEpochToDateForTripReport } from "../../utils/select-time-utility";
 import { calculateDuration, formatDuration } from "../../utils/utility";
 import EngineStartStopDocs from "./download-docs/engine-start-stop-docs";
@@ -240,36 +241,18 @@ const EngineStartStopReport = ({
       {engineStats.length > 0 ? (
         <div className='overflow-x-auto rounded-lg border border-gray-200'>
           <table className='min-w-full divide-y-2 divide-gray-200 bg-white text-sm'>
-            <thead className='ltr:text-left rtl:text-right'>
-              <tr>
-                <th className='whitespace-nowrap px-4 py-2 font-medium text-gray-900'>
-                  Time Range
-                </th>
-                <th className='whitespace-nowrap px-4 py-2 font-medium text-gray-900'>
-                  Duration
-                </th>
-
-                <th className='whitespace-nowrap px-4 py-2 font-medium text-gray-900'>
-                  Travelled Distance
-                </th>
-                <th className='whitespace-nowrap px-4 py-2 font-medium text-gray-900'>
-                  Avg. Speed
-                </th>
-                <th className='whitespace-nowrap px-4 py-2 font-medium text-gray-900'>
-                  Max Speed
-                </th>
-                <th className='whitespace-nowrap px-4 py-2 font-medium text-gray-900'>
-                  Location
-                </th>
-                <th className='whitespace-nowrap px-4 py-2 font-medium text-gray-900'>
-                  Nearby Place
-                </th>
-                <th className='whitespace-nowrap px-4 py-2 font-medium text-gray-900'>
-                  Status
-                </th>
-              </tr>
-            </thead>
-
+            <THead
+              columns={[
+                "Time Range",
+                "Duration",
+                "Travelled Distance",
+                "Avg. Speed",
+                "Max Speed",
+                "Location",
+                "Nearby Place",
+                "Status",
+              ]}
+            />
             <tbody className='divide-y divide-gray-200'>
               {engineStats.map((report, index) => (
                 <tr key={index}>

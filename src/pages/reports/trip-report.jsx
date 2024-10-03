@@ -3,6 +3,7 @@ import { BlobProvider, PDFDownloadLink } from "@react-pdf/renderer";
 import { saveAs } from "file-saver";
 import { FiShare2 } from "react-icons/fi";
 import { HiOutlineDownload, HiOutlinePrinter } from "react-icons/hi";
+import THead from "../../common/table-ingredients/tHead";
 import { formatEpochToDateForTripReport } from "../../utils/select-time-utility";
 import TripReportDocs from "./download-docs/trip-report-docs";
 
@@ -146,25 +147,8 @@ const TripReport = ({
       {reports.length > 0 ? (
         <div className='overflow-x-auto rounded-lg border border-gray-200'>
           <table className='min-w-full divide-y-2 divide-gray-200 bg-white text-sm'>
-            <thead className='ltr:text-left rtl:text-right'>
-              <tr>
-                <th className='whitespace-nowrap px-4 py-2 font-medium text-gray-900'>
-                  Date
-                </th>
-                <th className='whitespace-nowrap px-4 py-2 font-medium text-gray-900'>
-                  Location
-                </th>
-                <th className='whitespace-nowrap px-4 py-2 font-medium text-gray-900'>
-                  Speed (km/h)
-                </th>
-                <th className='whitespace-nowrap px-4 py-2 font-medium text-gray-900'>
-                  Cumulative Distance
-                </th>
-                <th className='whitespace-nowrap px-4 py-2 font-medium text-gray-900'>
-                  Engine
-                </th>
-              </tr>
-            </thead>
+            
+            <THead columns={["Date", "Location", "Speed (km/h)", "Cumulative Distance", "Engine"]} />
 
             <tbody className='divide-y divide-gray-200'>
               {reports.slice(0,10).map((report, index) => (

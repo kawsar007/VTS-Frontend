@@ -3,9 +3,12 @@ import { MdDelete } from "react-icons/md";
 import { toast } from "react-toastify";
 import { axiosOpen } from "../../../api/axios";
 import DeleteModal from "../../../common/DeleteModal";
+import THead from "../../../common/table-ingredients/tHead";
 import TableHeader from "../../../common/table-ingredients/table-header";
 import AddUserModal from "../../../components/users/AddUserModal";
 const GET_ALL_USER = "user/all-user/info";
+
+const columns = ['SL', 'Name', 'Email', 'Phone', 'Address', 'Role', 'Username', 'Action'];
 
 const Users = () => {
   const [showModal, setShowModal] = useState(false);
@@ -74,7 +77,7 @@ const Users = () => {
       <div className='rounded-lg border border-gray-200'>
         <div className='overflow-x-auto rounded-t-lg'>
           <table className='min-w-full divide-y-2 divide-gray-200 bg-white text-sm'>
-            <thead className='ltr:text-left rtl:text-right'>
+            {/* <thead className='ltr:text-left rtl:text-right'>
               <tr>
                 <th className='whitespace-nowrap px-4 py-2 font-medium text-gray-900'>
                   SL
@@ -101,8 +104,8 @@ const Users = () => {
                   Action
                 </th>
               </tr>
-            </thead>
-
+            </thead> */}
+            <THead columns={columns} />
             <tbody className='divide-y divide-gray-200 text-center'>
               {allUsers.map((user, i) => (
                 <tr key={i}>
